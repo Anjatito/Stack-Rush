@@ -1,9 +1,8 @@
+window.fcProvider = null;
+window.fcAddress = null;
+
+
 console.clear();
-
-if (window.sdk && window.sdk.actions && typeof window.sdk.actions.ready === 'function') {
-  window.sdk.actions.ready()
-}
-
 var Stage = /** @class */ (function () {
   function Stage() {
     // container
@@ -259,11 +258,12 @@ var Game = /** @class */ (function () {
     };
     this.blocks = [];
     this.state = this.STATES.LOADING;
-    this.stage = new Stage();
-    this.mainContainer = document.getElementById("container");
-    this.scoreContainer = document.getElementById("score");
-    this.startButton = document.getElementById("start-button");
-    this.instructions = document.getElementById("instructions");
+this.stage = new Stage();
+this.mainContainer = document.getElementById("container");
+this.scoreContainer = document.getElementById("score");
+this.startButton = document.getElementById("start-button");
+this.connectButton = document.getElementById("connect-button");
+this.instructions = document.getElementById("instructions");
     this.scoreContainer.innerHTML = "0";
     this.newBlocks = new THREE.Group();
     this.placedBlocks = new THREE.Group();
@@ -271,6 +271,20 @@ var Game = /** @class */ (function () {
     this.stage.add(this.newBlocks);
     this.stage.add(this.placedBlocks);
     this.stage.add(this.choppedBlocks);
+
+    // connect button only useful inside Farcaster
+if (this.connectButton) {
+  var sdk = window.miniappSdk;
+  if (!sdk || !sdk.wallet || typeof sdk.wallet.getEthereumProvider !== "function") {
+    this.connectButton.style.display = "none";
+  } else {
+    this.connectButton.addEventListener("click", function (e) {
+      e.stopPropagation(); // do not trigger game click
+      _this.onConnectClick();
+    });
+  }
+}
+
     this.addBlock();
     this.tick();
     this.updateState(this.STATES.READY);
@@ -293,6 +307,47 @@ var Game = /** @class */ (function () {
     this.mainContainer.classList.add(newState);
     this.state = newState;
   };
+
+  Game.prototype.onConnectClick = function () {
+  var _this = this;
+  var sdk = window.miniappSdk;
+
+  if (!sdk || !sdk.wallet || typeof sdk.wallet.getEthereumProvider !== "function") {
+    alert("Wallet connect only works inside Farcaster mini app");
+    return;
+  }
+
+  if (this._connecting) return;
+  this._connecting = true;
+
+  sdk.wallet
+    .getEthereumProvider({ chainId: "0x2105" }) // Base
+    .then(function (provider) {
+      if (!provider || typeof provider.request !== "function") {
+        throw new Error("no provider");
+      }
+      window.fcProvider = provider;
+      return provider.request({ method: "eth_requestAccounts", params: [] });
+    })
+    .then(function (accounts) {
+      window.fcAddress = accounts && accounts[0];
+      if (!window.fcAddress) {
+        throw new Error("no account");
+      }
+
+      if (_this.connectButton) {
+        _this.connectButton.textContent = "Wallet connected";
+        _this.connectButton.disabled = true;
+      }
+    })
+    .catch(function (err) {
+      console.log("connect failed", err);
+    })
+    .then(function () {
+      _this._connecting = false;
+    });
+};
+
 Game.prototype.onAction = function () {
   switch (this.state) {
     case this.STATES.READY:
