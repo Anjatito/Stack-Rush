@@ -516,12 +516,8 @@ Game.prototype.startGame = function () {
   };
 Game.prototype.endGame = function () {
   this.updateState(this.STATES.ENDED);
-
-  // show wallet button again
-  if (this.connectButton) {
-    this.connectButton.style.display = "inline-block";
-  }
 };
+
 
   Game.prototype.tick = function () {
     var _this = this;

@@ -43,11 +43,24 @@
 <script type="module">
   import { sdk } from "https://esm.sh/@farcaster/miniapp-sdk"
 
-  // make sdk visible to script.js
+  // share sdk with script.js
   window.miniappSdk = sdk
 
-  // tell Farcaster the app is ready
-  sdk.actions.ready()
+  ;(async () => {
+    try {
+      // tell Farcaster we are ready
+      await sdk.actions.ready()
+
+      // only try addMiniApp if actually inside mini app
+      const inMini = await sdk.isInMiniApp?.()
+      if (inMini) {
+        await sdk.actions.addMiniApp()
+      }
+    } catch (err) {
+      console.error("miniapp setup error", err)
+    }
+  })()
 </script>
+
 </body>
 </html>
