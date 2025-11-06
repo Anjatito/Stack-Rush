@@ -258,6 +258,8 @@ var Game = /** @class */ (function () {
     };
     this.blocks = [];
     this.state = this.STATES.LOADING;
+    this.lastStartTxOk = false;
+this.lastRestartTxOk = false;
 this.stage = new Stage();
 this.mainContainer = document.getElementById("container");
 this.scoreContainer = document.getElementById("score");
@@ -393,18 +395,20 @@ Game.prototype.tryStartGame = function () {
       params: [tx]
     })
     .then(function (hash) {
-      // ✅ ONLY here, when tx is OK, we start the game
+      // tx OK -> give "start key"
       console.log("start tx ok", hash);
+      _this.lastStartTxOk = true;
       _this.startGame();
     })
     .catch(function (err) {
-      // ❌ if user cancels or tx fails, we do NOTHING
+      // tx cancelled or failed -> no key, no start
       console.log("start tx failed or cancelled", err);
     })
     .then(function () {
       _this._starting = false;
     });
 };
+
 
 
 Game.prototype.tryRestartGame = function () {
@@ -441,12 +445,13 @@ Game.prototype.tryRestartGame = function () {
       params: [tx]
     })
     .then(function (hash) {
-      // ✅ ONLY here, when tx is OK, we restart the game
+      // tx OK -> give "restart key"
       console.log("restart tx ok", hash);
+      _this.lastRestartTxOk = true;
       _this.restartGame();
     })
     .catch(function (err) {
-      // ❌ cancel or error = stay on Game Over screen
+      // tx cancelled or failed -> stay on Game Over
       console.log("restart tx failed or cancelled", err);
     })
     .then(function () {
@@ -456,7 +461,22 @@ Game.prototype.tryRestartGame = function () {
 
 
 
+
 Game.prototype.startGame = function () {
+  var sdk = window.miniappSdk;
+
+  // If we are inside Farcaster, only allow start when a tx just succeeded
+  if (sdk && sdk.wallet && typeof sdk.wallet.getEthereumProvider === "function") {
+    if (!this.lastStartTxOk && !this.lastRestartTxOk) {
+      // no valid tx -> do nothing
+      return;
+    }
+  }
+
+  // consume the keys (one-time use)
+  this.lastStartTxOk = false;
+  this.lastRestartTxOk = false;
+
   if (this.state != this.STATES.PLAYING) {
     this.scoreContainer.innerHTML = "0";
     this.updateState(this.STATES.PLAYING);
@@ -468,6 +488,7 @@ Game.prototype.startGame = function () {
     }
   }
 };
+
 
   Game.prototype.restartGame = function () {
     var _this = this;
