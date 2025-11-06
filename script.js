@@ -361,7 +361,6 @@ Game.prototype.onAction = function () {
 
 Game.prototype.tryStartGame = function () {
   var _this = this;
-
   var sdk = window.miniappSdk;
 
   // not inside Farcaster: just start game normally
@@ -385,7 +384,7 @@ Game.prototype.tryStartGame = function () {
   var tx = {
     from: from,
     to: from,
-    value: "0x9184e72a000" // 0.00001 ETH in wei
+    value: "0x9184e72a000" // 0.00001 ETH
   };
 
   provider
@@ -394,22 +393,25 @@ Game.prototype.tryStartGame = function () {
       params: [tx]
     })
     .then(function (hash) {
-      console.log("tx ok", hash);
+      // ✅ ONLY here, when tx is OK, we start the game
+      console.log("start tx ok", hash);
       _this.startGame();
     })
     .catch(function (err) {
-      console.log("tx failed or cancelled", err);
+      // ❌ if user cancels or tx fails, we do NOTHING
+      console.log("start tx failed or cancelled", err);
     })
     .then(function () {
       _this._starting = false;
     });
 };
 
+
 Game.prototype.tryRestartGame = function () {
   var _this = this;
   var sdk = window.miniappSdk;
 
-  // if not inside Farcaster, just restart
+  // not inside Farcaster: just restart normally
   if (!sdk || !sdk.wallet || typeof sdk.wallet.getEthereumProvider !== "function") {
     this.restartGame();
     return;
@@ -439,16 +441,19 @@ Game.prototype.tryRestartGame = function () {
       params: [tx]
     })
     .then(function (hash) {
+      // ✅ ONLY here, when tx is OK, we restart the game
       console.log("restart tx ok", hash);
       _this.restartGame();
     })
     .catch(function (err) {
+      // ❌ cancel or error = stay on Game Over screen
       console.log("restart tx failed or cancelled", err);
     })
     .then(function () {
       _this._restarting = false;
     });
 };
+
 
 
 Game.prototype.startGame = function () {
