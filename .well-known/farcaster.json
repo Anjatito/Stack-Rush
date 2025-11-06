@@ -1,8 +1,8 @@
 {
   "accountAssociation": {
-    "header": "      ",
-    "payload": "      ",
-    "signature": "     "
+    "header": "eyJmaWQiOjE0MjQ2ODEsInR5cGUiOiJjdXN0b2R5Iiwia2V5IjoiMHhDNEM2Q0U0ZUIyQjVlRUM3NDcwQThCQzZFNzEzNWNENDc4OTc2ZTUwIn0",
+    "payload": "eyJkb21haW4iOiJzdGFjay1ydXNoLXdoZWF0LnZlcmNlbC5hcHAifQ",
+    "signature": "QqsPtYnpowNtm6xDw8EYSP3yynZwPgVF6SdLv70rGOU/ysbSiDZijNltm5GWxM3HlMrHtB4L3a0ylZSIM+Uophs="
   },
   "miniapp": {
     "version": "1",
@@ -23,6 +23,6 @@
     "ogImageUrl": "https://stack-rush-wheat.vercel.app/og.png"
   },
   "baseBuilder": {
-    "ownerAddress": "    "
+    "ownerAddress": "0xB423ECf3bEB753B9e8253F60B08f4c91C5025549"
   }
 }
