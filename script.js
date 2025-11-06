@@ -274,16 +274,12 @@ this.instructions = document.getElementById("instructions");
 
     // connect button only useful inside Farcaster
 if (this.connectButton) {
-  var sdk = window.miniappSdk;
-  if (!sdk || !sdk.wallet || typeof sdk.wallet.getEthereumProvider !== "function") {
-    this.connectButton.style.display = "none";
-  } else {
-    this.connectButton.addEventListener("click", function (e) {
-      e.stopPropagation(); // do not trigger game click
-      _this.onConnectClick();
-    });
-  }
+  this.connectButton.addEventListener('click', function (e) {
+    e.stopPropagation();   // do not trigger game tap
+    _this.onConnectClick();
+  });
 }
+
 
     this.addBlock();
     this.tick();
@@ -365,61 +361,49 @@ Game.prototype.onAction = function () {
 Game.prototype.tryStartGame = function () {
   var _this = this;
 
-  // if we are not in Farcaster, just start normally
   var sdk = window.miniappSdk;
+
+  // not inside Farcaster: just start game normally
   if (!sdk || !sdk.wallet || typeof sdk.wallet.getEthereumProvider !== "function") {
     this.startGame();
     return;
   }
 
-  // dont spam multiple starts
+  // must connect wallet first
+  if (!window.fcProvider || !window.fcAddress) {
+    alert("Connect your wallet first");
+    return;
+  }
+
   if (this._starting) return;
   this._starting = true;
 
-  // ask Farcaster for a provider on Base
-  sdk.wallet
-    .getEthereumProvider({ chainId: "0x2105" }) // Base
-    .then(function (provider) {
-      if (!provider || typeof provider.request !== "function") {
-        throw new Error("no provider");
-      }
+  var provider = window.fcProvider;
+  var from = window.fcAddress;
 
-      // ask for the users address
-      return provider
-        .request({ method: "eth_requestAccounts", params: [] })
-        .then(function (accounts) {
-          var from = accounts && accounts[0];
-          if (!from) {
-            throw new Error("no account");
-          }
+  var tx = {
+    from: from,
+    to: from,
+    value: "0x9184e72a000" // 0.00001 ETH in wei
+  };
 
-          // tiny self transfer 0.00001 ETH
-          var tx = {
-            from: from,
-            to: from,
-            value: "0x9184e72a000" // 0.00001 ETH in wei
-          };
-
-          // send tx
-          return provider.request({
-            method: "eth_sendTransaction",
-            params: [tx]
-          });
-        });
+  provider
+    .request({
+      method: "eth_sendTransaction",
+      params: [tx]
     })
     .then(function (hash) {
       console.log("tx ok", hash);
-      // after tx is sent, start game
       _this.startGame();
     })
     .catch(function (err) {
       console.log("tx failed or cancelled", err);
-      // if it fails or user cancels, do nothing
     })
     .then(function () {
       _this._starting = false;
     });
 };
+
 
   Game.prototype.startGame = function () {
     if (this.state != this.STATES.PLAYING) {
@@ -516,7 +500,8 @@ Game.prototype.tryStartGame = function () {
     if (lastBlock && lastBlock.state == lastBlock.STATES.MISSED) {
       return this.endGame();
     }
-    this.scoreContainer.innerHTML = String(this.blocks.length - 1);
+  var visibleScore = Math.max(this.blocks.length - 1, 0);
+  this.scoreContainer.innerHTML = String(visibleScore);
     var newKidOnTheBlock = new Block(lastBlock);
     this.newBlocks.add(newKidOnTheBlock.mesh);
     this.blocks.push(newKidOnTheBlock);
