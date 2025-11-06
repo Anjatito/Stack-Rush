@@ -50,14 +50,15 @@ body {
 
 #container #score {
   position: absolute;
-  top: 20px;
+  top: 60px; /* moved lower, under header */
   width: 100%;
   text-align: center;
-  font-size: 10vh;
+  font-size: 9vh;
   transition: transform 0.5s ease;
-  color: #334;
-  transform: translatey(-200px) scale(1);
+  color: #333344;
+  transform: none;
 }
+
 #container #game {
   position: absolute;
   top: 0;
@@ -111,7 +112,7 @@ body {
 #container #instructions {
   position: absolute;
   width: 100%;
-  top: 8vh;
+  top: 4vh;
   left: 0;
   text-align: center;
   padding: 0 12px;
