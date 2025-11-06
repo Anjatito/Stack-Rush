@@ -1,0 +1,28 @@
+{
+  "accountAssociation": {
+    "header": "      ",
+    "payload": "      ",
+    "signature": "     "
+  },
+  "miniapp": {
+    "version": "1",
+    "name": "Stack Rush",
+    "subtitle": "Stack blocks. Dont miss.",
+    "description": "Time your taps, slice the edges, and build the cleanest tower you can without missing a block.",
+    "homeUrl": "https://stack-rush-wheat.vercel.app",
+    "webhookUrl": "https://stack-rush-wheat.vercel.app/api/webhook",
+    "primaryCategory": "games",
+    "tags": ["games", "arcade", "tower", "stack", "onchain"],
+    "iconUrl": "https://stack-rush-wheat.vercel.app/icon.png",
+    "heroImageUrl": "https://stack-rush-wheat.vercel.app/og.png",
+    "splashImageUrl": "https://stack-rush-wheat.vercel.app/og.png",
+    "splashBackgroundColor": "#000000",
+    "screenshotUrls": ["https://stack-rush-wheat.vercel.app/screenshot-portrait.png"],
+    "ogTitle": "Stack Rush",
+    "ogDescription": "Stack blocks with perfect timing and chase your highest tower.",
+    "ogImageUrl": "https://stack-rush-wheat.vercel.app/og.png"
+  },
+  "baseBuilder": {
+    "ownerAddress": "    "
+  }
+}
