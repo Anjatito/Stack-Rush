@@ -405,13 +405,19 @@ Game.prototype.tryStartGame = function () {
 };
 
 
-  Game.prototype.startGame = function () {
-    if (this.state != this.STATES.PLAYING) {
-      this.scoreContainer.innerHTML = "0";
-      this.updateState(this.STATES.PLAYING);
-      this.addBlock();
+Game.prototype.startGame = function () {
+  if (this.state != this.STATES.PLAYING) {
+    this.scoreContainer.innerHTML = "0";
+    this.updateState(this.STATES.PLAYING);
+    this.addBlock();
+
+    // hide wallet button while playing
+    if (this.connectButton) {
+      this.connectButton.style.display = "none";
     }
-  };
+  }
+};
+
   Game.prototype.restartGame = function () {
     var _this = this;
     this.updateState(this.STATES.RESETTING);
@@ -508,9 +514,15 @@ Game.prototype.tryStartGame = function () {
     this.stage.setCamera(this.blocks.length * 2);
     if (this.blocks.length >= 5) this.instructions.classList.add("hide");
   };
-  Game.prototype.endGame = function () {
-    this.updateState(this.STATES.ENDED);
-  };
+Game.prototype.endGame = function () {
+  this.updateState(this.STATES.ENDED);
+
+  // show wallet button again
+  if (this.connectButton) {
+    this.connectButton.style.display = "inline-block";
+  }
+};
+
   Game.prototype.tick = function () {
     var _this = this;
     this.blocks[this.blocks.length - 1].tick();
