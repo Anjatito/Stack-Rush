@@ -7,8 +7,6 @@
 
   <script src='https://cdnjs.cloudflare.com/ajax/libs/three.js/r83/three.min.js'></script>
   <script src='https://cdnjs.cloudflare.com/ajax/libs/gsap/latest/TweenMax.min.js'></script>
-  <script src='https://unpkg.com/@farcaster/miniapp-sdk/dist/browser.global.js'></script>
-
   <title>Stack Rush</title>
   <link rel='stylesheet' href='style.css' />
 </head>
@@ -38,6 +36,13 @@
   </div>
 
   <script src='script.js'></script>
+
+  <script type="module">
+  import { sdk } from "https://esm.sh/@farcaster/miniapp-sdk"
+
+  sdk.actions.ready()
+</script>
+
 </body>
 
 </html>
