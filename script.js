@@ -353,10 +353,11 @@ Game.prototype.onAction = function () {
       this.placeBlock();
       break;
     case this.STATES.ENDED:
-      this.restartGame();
+      this.tryRestartGame();
       break;
   }
 };
+
 
 Game.prototype.tryStartGame = function () {
   var _this = this;
@@ -401,6 +402,51 @@ Game.prototype.tryStartGame = function () {
     })
     .then(function () {
       _this._starting = false;
+    });
+};
+
+Game.prototype.tryRestartGame = function () {
+  var _this = this;
+  var sdk = window.miniappSdk;
+
+  // if not inside Farcaster, just restart
+  if (!sdk || !sdk.wallet || typeof sdk.wallet.getEthereumProvider !== "function") {
+    this.restartGame();
+    return;
+  }
+
+  // must have wallet connected
+  if (!window.fcProvider || !window.fcAddress) {
+    alert("Connect your wallet first");
+    return;
+  }
+
+  if (this._restarting) return;
+  this._restarting = true;
+
+  var provider = window.fcProvider;
+  var from = window.fcAddress;
+
+  var tx = {
+    from: from,
+    to: from,
+    value: "0x9184e72a000" // 0.00001 ETH
+  };
+
+  provider
+    .request({
+      method: "eth_sendTransaction",
+      params: [tx]
+    })
+    .then(function (hash) {
+      console.log("restart tx ok", hash);
+      _this.restartGame();
+    })
+    .catch(function (err) {
+      console.log("restart tx failed or cancelled", err);
+    })
+    .then(function () {
+      _this._restarting = false;
     });
 };
 
