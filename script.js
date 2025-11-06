@@ -293,19 +293,79 @@ var Game = /** @class */ (function () {
     this.mainContainer.classList.add(newState);
     this.state = newState;
   };
-  Game.prototype.onAction = function () {
-    switch (this.state) {
-      case this.STATES.READY:
-        this.startGame();
-        break;
-      case this.STATES.PLAYING:
-        this.placeBlock();
-        break;
-      case this.STATES.ENDED:
-        this.restartGame();
-        break;
-    }
-  };
+Game.prototype.onAction = function () {
+  switch (this.state) {
+    case this.STATES.READY:
+      this.tryStartGame();
+      break;
+    case this.STATES.PLAYING:
+      this.placeBlock();
+      break;
+    case this.STATES.ENDED:
+      this.restartGame();
+      break;
+  }
+};
+
+Game.prototype.tryStartGame = function () {
+  var _this = this;
+
+  // if we are not in Farcaster, just start normally
+  var sdk = window.miniappSdk;
+  if (!sdk || !sdk.wallet || typeof sdk.wallet.getEthereumProvider !== "function") {
+    this.startGame();
+    return;
+  }
+
+  // dont spam multiple starts
+  if (this._starting) return;
+  this._starting = true;
+
+  // ask Farcaster for a provider on Base
+  sdk.wallet
+    .getEthereumProvider({ chainId: "0x2105" }) // Base
+    .then(function (provider) {
+      if (!provider || typeof provider.request !== "function") {
+        throw new Error("no provider");
+      }
+
+      // ask for the users address
+      return provider
+        .request({ method: "eth_requestAccounts", params: [] })
+        .then(function (accounts) {
+          var from = accounts && accounts[0];
+          if (!from) {
+            throw new Error("no account");
+          }
+
+          // tiny self transfer 0.00001 ETH
+          var tx = {
+            from: from,
+            to: from,
+            value: "0x9184e72a000" // 0.00001 ETH in wei
+          };
+
+          // send tx
+          return provider.request({
+            method: "eth_sendTransaction",
+            params: [tx]
+          });
+        });
+    })
+    .then(function (hash) {
+      console.log("tx ok", hash);
+      // after tx is sent, start game
+      _this.startGame();
+    })
+    .catch(function (err) {
+      console.log("tx failed or cancelled", err);
+      // if it fails or user cancels, do nothing
+    })
+    .then(function () {
+      _this._starting = false;
+    });
+};
+
   Game.prototype.startGame = function () {
     if (this.state != this.STATES.PLAYING) {
       this.scoreContainer.innerHTML = "0";

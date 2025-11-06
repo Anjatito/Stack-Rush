@@ -35,13 +35,18 @@
     </div>
   </div>
 
-  <script src='script.js'></script>
-
-  <script type="module">
+<script src="script.js"></script>
+<script type="module">
   import { sdk } from "https://esm.sh/@farcaster/miniapp-sdk"
 
+  // make sdk visible to script.js
+  window.miniappSdk = sdk
+
+  // tell Farcaster the app is ready
   sdk.actions.ready()
+  await sdk.actions.addMiniApp()
 </script>
+
 
 </body>
 
